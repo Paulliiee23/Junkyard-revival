@@ -14,19 +14,9 @@ jobs:
         with:
           version: 4.4.1
           use-dotnet: false
-      - name: Check project
-        id: check
-        shell: bash
-        run: |
-          if test -f project.godot; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::notice::Godot project not uploaded yet"
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          fi
       - name: Import Godot assets
-        if: steps.check.outputs.present == 'true'
         run: godot --headless --path . --editor --import --quit
       - name: Check scenes and scripts
-        if: steps.check.outputs.present == 'true'
         run: godot --headless --path . --editor --quit
+      - name: Run salvage economy tests
+        run: godot --headless --path . --script res://tests/test_salvage.gd
