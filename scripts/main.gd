@@ -1,6 +1,7 @@
 extends Control
 
 const Economy = preload("res://scripts/salvage_economy.gd")
+const Restoration = preload("res://scripts/restoration.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -96,7 +97,36 @@ func _render_cars() -> void:
         for part in car.get("parts", {}).keys():
             _button("Sell %s  ($%d)" % [part, int(car["parts"][part])], _sell_part.bind(part))
     _button("Strip and sell all remaining parts", _strip_car)
+    if current_tab == 1 or current_tab == 2:
+        _label("Restoration: %d/%d stages" % [Restoration.restoration_progress(car), Restoration.STAGES.size()])
+        for stage in Restoration.STAGES:
+            var cost: int = Restoration.stage_cost(car, stage)
+            if cost == 0:
+                _label("%s: complete" % stage)
+            else:
+                _button("Restore %s ($%d)" % [stage, cost], _restore_stage.bind(stage))
+        _label("Paint finish: %s" % car.get("paint", "Rust"))
+        for paint_name in ["Rust", "Crimson", "Midnight", "Ivory", "Violet", "Lime"]:
+            _button("Paint: %s" % paint_name, _paint_car.bind(paint_name))
     _button("Sell bare shell and remove vehicle", _sell_shell)
+
+func _restore_stage(stage: String) -> void:
+    if cars.is_empty():
+        return
+    var price: int = Restoration.complete_stage(cars[selected_car], stage, cash)
+    if price > 0:
+        cash -= price
+        status = "Completed %s for $%d." % [stage, price]
+    else:
+        status = "Stage already complete or not enough cash."
+    _save_and_render()
+
+func _paint_car(paint_name: String) -> void:
+    if cars.is_empty():
+        return
+    if Restoration.apply_paint(cars[selected_car], paint_name):
+        status = "Selected %s paint finish." % paint_name
+    _save_and_render()
 
 func _claim_wreck() -> void:
     if cars.size() >= MAX_STORAGE:
