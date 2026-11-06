@@ -28,3 +28,5 @@ jobs:
         run: godot --headless --path . --script res://tests/test_customisation.gd
       - name: Run workshop bay tests
         run: godot --headless --path . --script res://tests/test_workshop_bays.gd
+      - name: Run interactive restoration tests
+        run: godot --headless --path . --script res://tests/test_restoration_tasks.gd
