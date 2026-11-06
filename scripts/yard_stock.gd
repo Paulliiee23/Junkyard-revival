@@ -14,6 +14,7 @@ static func generate(zone_index: int, timestamp: int) -> Array:
         var car: Dictionary = SalvageEconomy.make_zone_wreck(model_index, int(rng.randi()))
         car["id"] = "yard-%d-%d-%d" % [zone_index, bucket, slot]
         car["source_zone"] = JunkyardZones.zone_name(zone_index)
+        VehicleCondition.apply_find(car, rng)
         result.append(car)
     return result
 
