@@ -26,3 +26,5 @@ jobs:
         run: godot --headless --path . --script res://tests/test_parts_inventory.gd
       - name: Run customisation tests
         run: godot --headless --path . --script res://tests/test_customisation.gd
+      - name: Run workshop bay tests
+        run: godot --headless --path . --script res://tests/test_workshop_bays.gd
