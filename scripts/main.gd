@@ -3,12 +3,14 @@ extends Control
 const Economy = preload("res://scripts/salvage_economy.gd")
 const Restoration = preload("res://scripts/restoration.gd")
 const Customisation = preload("res://scripts/customisation.gd")
+const PartsInventory = preload("res://scripts/parts_inventory.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
 var cash := 5000
 var level := 1
 var cars: Array[Dictionary] = []
+var spare_parts: Array = []
 var selected_car := 0
 var garage_bay := 0
 var status := "Welcome to Junkyard Revival."
@@ -78,6 +80,7 @@ func _render() -> void:
         7:
             _label("Rust Bucket / Restored Beauty storage")
             _render_cars()
+            _render_spare_parts()
         2, 8:
             _render_cars()
         _:
@@ -95,10 +98,13 @@ func _render_cars() -> void:
     _label("Selected: %s" % Economy.display_name(car))
     _label("%d removable parts remaining" % car.get("parts", {}).size())
     if current_tab == 2:
-        _label("Select a category and choose None to remove it from the build.")
+        _label("Remove a part to storage, or select a fitted part style.")
+        for part in car.get("parts", {}).keys():
+            _button("Detach %s (keep in storage)" % part, _detach_part.bind(part))
         for part in Economy.PARTS:
             _button("%s: %s" % [part, Customisation.selected_choice(car, part)], _cycle_part.bind(part))
         _label("Driveable: %s" % ("Yes" if Customisation.is_driveable(car) else "No - essential parts missing"))
+        _render_spare_parts()
     if current_tab == 8:
         for part in car.get("parts", {}).keys():
             _button("Sell %s  ($%d)" % [part, int(car["parts"][part])], _sell_part.bind(part))
@@ -116,6 +122,37 @@ func _render_cars() -> void:
             _button("Paint: %s" % paint_name, _paint_car.bind(paint_name))
     _button("Sell bare shell and remove vehicle", _sell_shell)
 
+func _render_spare_parts() -> void:
+    _label("Spare parts in storage: %d" % spare_parts.size())
+    for i in range(spare_parts.size()):
+        var item: Dictionary = spare_parts[i]
+        _label("%s - %s ($%d)" % [item.get("part", "?"), item.get("variant", "Factory"), int(item.get("value", 0))])
+        _button("Sell spare #%d" % (i + 1), _sell_spare.bind(i))
+        if not cars.is_empty():
+            _button("Fit spare #%d to selected car" % (i + 1), _fit_spare.bind(i))
+
+func _detach_part(part: String) -> void:
+    if cars.is_empty():
+        return
+    if PartsInventory.detach(cars[selected_car], part, spare_parts):
+        status = "Removed %s and placed it in storage." % part
+    _save_and_render()
+
+func _sell_spare(index: int) -> void:
+    var payout: int = PartsInventory.sell(spare_parts, index)
+    cash += payout
+    status = "Sold stored part for $%d." % payout
+    _save_and_render()
+
+func _fit_spare(index: int) -> void:
+    if cars.is_empty():
+        return
+    if PartsInventory.attach(cars[selected_car], spare_parts, index):
+        status = "Installed stored part."
+    else:
+        status = "Cannot fit this part: category already occupied or item unavailable."
+    _save_and_render()
+
 func _cycle_part(part: String) -> void:
     if cars.is_empty():
         return
@@ -124,8 +161,14 @@ func _cycle_part(part: String) -> void:
     var current: String = Customisation.selected_choice(car, part)
     var next_index: int = (choices.find(current) + 1) % choices.size()
     var next_choice: String = str(choices[next_index])
-    Customisation.set_choice(car, part, next_choice)
-    status = "%s set to %s." % [part, next_choice]
+    if next_choice == "None" and car.get("parts", {}).has(part):
+        PartsInventory.detach(car, part, spare_parts)
+        status = "Removed %s to storage." % part
+    elif next_choice != "None" and not car.get("parts", {}).has(part):
+        status = "Fit a %s from spare-parts storage first." % part
+    else:
+        Customisation.set_choice(car, part, next_choice)
+        status = "%s set to %s." % [part, next_choice]
     _save_and_render()
 
 func _restore_stage(stage: String) -> void:
@@ -201,7 +244,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay}))
+        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -216,6 +259,9 @@ func _load_game() -> void:
         level = int(data.get("level", 1))
         selected_car = int(data.get("selected", 0))
         garage_bay = clampi(int(data.get("bay", 0)), 0, 2)
+        var saved_spares = data.get("spare_parts", [])
+        if saved_spares is Array:
+            spare_parts = saved_spares
         var saved_cars = data.get("cars", [])
         if saved_cars is Array:
             for item in saved_cars:
