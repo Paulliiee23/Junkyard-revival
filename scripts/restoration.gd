@@ -23,7 +23,10 @@ static func stage_cost(car: Dictionary, stage: String) -> int:
     var completed: Dictionary = car.get("restoration", {})
     if completed.get(stage, false):
         return 0
-    return int(STAGE_COSTS[stage])
+    # Better-preserved wrecks require less labour; legacy saves retain base cost.
+    var condition: int = clampi(int(car.get("condition", 30)), 0, 100)
+    var multiplier: float = clampf(1.0 + (30.0 - float(condition)) * 0.006, 0.58, 1.18)
+    return maxi(1, roundi(float(STAGE_COSTS[stage]) * multiplier))
 
 static func complete_stage(car: Dictionary, stage: String, available_cash: int) -> int:
     ensure_state(car)
