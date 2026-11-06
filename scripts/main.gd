@@ -12,6 +12,7 @@ const YardStock = preload("res://scripts/yard_stock.gd")
 const VehicleCondition = preload("res://scripts/vehicle_condition.gd")
 const VehicleAppraisal = preload("res://scripts/vehicle_appraisal.gd")
 const CarBuyers = preload("res://scripts/car_buyers.gd")
+const JunkyardBackdrop = preload("res://scripts/junkyard_backdrop.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -43,7 +44,7 @@ func _ready() -> void:
 
 func _build_ui() -> void:
     var bg := ColorRect.new()
-    bg.color = Color("#211d1b")
+    bg.color = Color("#171717")
     bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(bg)
     root = VBoxContainer.new()
@@ -113,7 +114,14 @@ func _render() -> void:
             _label("This feature is planned and not implemented yet.")
 
 func _render_junkyard() -> void:
-    _label("FIVE SALVAGE ZONES | Free common wrecks | No stamina limits")
+    var scene_panel := PanelContainer.new()
+    scene_panel.custom_minimum_size = Vector2(0, 320)
+    scene_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    body.add_child(scene_panel)
+    var yard_view := JunkyardBackdrop.new()
+    yard_view.custom_minimum_size = Vector2(0, 320)
+    scene_panel.add_child(yard_view)
+    _label("SALVAGE YARD | Choose a zone and inspect available wrecks")
     for i in range(JunkyardZones.ZONES.size()):
         var zone: Dictionary = JunkyardZones.ZONES[i]
         var unlocked: bool = JunkyardZones.unlocked(i, level)
