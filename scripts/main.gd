@@ -181,26 +181,29 @@ func _render_cars() -> void:
     _label("%d removable parts remaining" % car.get("parts", {}).size())
     _label("Shell resale: $%d  |  Installed parts: %d" % [Economy.sell_shell(car), car.get("parts", {}).size()])
     if current_tab == 2:
-        _label("Remove a part to storage, or select a fitted part style.")
-        _label("SELECT A PART STYLE  |  None is always available")
-        for part in car.get("parts", {}).keys():
-            _button("Detach %s (keep in storage)" % part, _detach_part.bind(part))
+        _label("CUSTOMISATION WORKBENCH  |  Pick a category, then choose its style.")
+        var category_picker := OptionButton.new()
+        category_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         for part in Economy.PARTS:
-            var row := HBoxContainer.new()
-            body.add_child(row)
-            var name_label := Label.new()
-            name_label.text = part
-            name_label.custom_minimum_size.x = 190
-            row.add_child(name_label)
-            var selector := OptionButton.new()
-            selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-            var choices: Array = Customisation.choices_for(part)
-            for choice in choices:
-                selector.add_item(str(choice))
-            var selected_index: int = choices.find(Customisation.selected_choice(car, part))
-            selector.select(maxi(0, selected_index))
-            selector.item_selected.connect(_choose_part.bind(part))
-            row.add_child(selector)
+            category_picker.add_item(part)
+        var category_index: int = Economy.PARTS.find(selected_category)
+        category_picker.select(maxi(0, category_index))
+        category_picker.item_selected.connect(_select_category)
+        body.add_child(category_picker)
+        var installed: bool = car.get("parts", {}).has(selected_category)
+        _label("Selected: %s  |  %s" % [selected_category, "Installed" if installed else "Not installed"])
+        var style_picker := OptionButton.new()
+        style_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        var styles: Array = Customisation.choices_for(selected_category)
+        for style in styles:
+            style_picker.add_item(str(style))
+        style_picker.select(maxi(0, styles.find(Customisation.selected_choice(car, selected_category))))
+        style_picker.item_selected.connect(_choose_selected_style)
+        body.add_child(style_picker)
+        if installed:
+            _button("Remove %s to spare-parts storage" % selected_category, _detach_part.bind(selected_category))
+        else:
+            _label("To install this part, select a matching spare below.")
         _label("Driveable: %s" % ("Yes" if Customisation.is_driveable(car) else "No - essential parts missing"))
         _render_spare_parts()
     if current_tab == 8:
@@ -250,6 +253,15 @@ func _fit_spare(index: int) -> void:
     else:
         status = "Cannot fit this part: category already occupied or item unavailable."
     _save_and_render()
+
+func _select_category(index: int) -> void:
+    if index < 0 or index >= Economy.PARTS.size():
+        return
+    selected_category = str(Economy.PARTS[index])
+    _save_and_render()
+
+func _choose_selected_style(index: int) -> void:
+    _choose_part(index, selected_category)
 
 func _choose_part(index: int, part: String) -> void:
     if cars.is_empty():
@@ -368,7 +380,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments}))
+        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -384,6 +396,9 @@ func _load_game() -> void:
         selected_car = int(data.get("selected", 0))
         garage_bay = clampi(int(data.get("bay", 0)), 0, 2)
         storage_filter = str(data.get("storage_filter", "All"))
+        selected_category = str(data.get("selected_category", "Spoiler"))
+        if not Economy.PARTS.has(selected_category):
+            selected_category = "Spoiler"
         var loaded_bays = data.get("bay_assignments", ["", "", ""])
         if loaded_bays is Array:
             bay_assignments = loaded_bays
