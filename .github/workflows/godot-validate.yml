@@ -22,3 +22,5 @@ jobs:
         run: godot --headless --path . --script res://tests/test_salvage.gd
       - name: Run restoration tests
         run: godot --headless --path . --script res://tests/test_restoration.gd
+      - name: Run detachable parts inventory tests
+        run: godot --headless --path . --script res://tests/test_parts_inventory.gd
