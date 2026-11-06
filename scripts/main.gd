@@ -97,8 +97,7 @@ func _render_cars() -> void:
         _button("%s  [%s]" % [Economy.display_name(car), "Restored Beauty" if car.get("restored", false) else "Rust Bucket"], _select_car.bind(i))
     var car: Dictionary = cars[selected_car]
     _label("Selected: %s" % Economy.display_name(car))
-    var preview := Control.new()
-    preview.set_script(VehiclePreviewScript)
+    var preview = VehiclePreviewScript.new()
     preview.custom_minimum_size = Vector2(560, 220)
     preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     body.add_child(preview)
