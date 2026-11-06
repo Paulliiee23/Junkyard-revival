@@ -2,6 +2,13 @@ extends RefCounted
 class_name Restoration
 
 const STAGES := ["Bodywork", "Mechanical", "Paint", "Interior", "Detailing"]
+const STAGE_TASKS := {
+    "Bodywork": ["Inspect rust", "Remove damaged panels", "Weld and straighten"],
+    "Mechanical": ["Diagnose engine", "Service drivetrain", "Test components"],
+    "Paint": ["Sand and prepare", "Apply primer", "Spray finish"],
+    "Interior": ["Remove worn trim", "Repair upholstery", "Refit cabin"],
+    "Detailing": ["Clean exterior", "Polish surfaces", "Final inspection"]
+}
 const STAGE_COSTS := {"Bodywork": 180, "Mechanical": 260, "Paint": 220, "Interior": 160, "Detailing": 120}
 
 static func ensure_state(car: Dictionary) -> void:
@@ -49,3 +56,38 @@ static func restoration_progress(car: Dictionary) -> int:
         if completed.get(stage, false):
             count += 1
     return count
+
+# Workshop actions are sequential and free to attempt. The stage charge is
+# applied only when the final task is completed; no time or energy restrictions.
+static func task_progress(car: Dictionary, stage: String) -> int:
+    var tasks: Dictionary = car.get("restoration_tasks", {})
+    return clampi(int(tasks.get(stage, 0)), 0, STAGE_TASKS.get(stage, []).size())
+
+static func next_task(car: Dictionary, stage: String) -> String:
+    if not STAGE_TASKS.has(stage) or stage_cost(car, stage) == 0:
+        return ""
+    var progress: int = task_progress(car, stage)
+    var tasks: Array = STAGE_TASKS[stage]
+    return str(tasks[progress]) if progress < tasks.size() else ""
+
+static func perform_task(car: Dictionary, stage: String, available_cash: int) -> int:
+    if not STAGE_TASKS.has(stage) or stage_cost(car, stage) <= 0:
+        return -1
+    var progress: int = task_progress(car, stage)
+    var tasks: Array = STAGE_TASKS[stage]
+    if progress >= tasks.size():
+        return -1
+    var final_task: bool = progress == tasks.size() - 1
+    var cost: int = stage_cost(car, stage) if final_task else 0
+    if available_cash < cost:
+        return -1
+    if not car.has("restoration_tasks"):
+        car["restoration_tasks"] = {}
+    var progress_data: Dictionary = car["restoration_tasks"]
+    progress_data[stage] = progress + 1
+    if final_task:
+        var paid: int = complete_stage(car, stage, available_cash)
+        if paid != cost:
+            progress_data[stage] = progress
+            return -1
+    return cost
