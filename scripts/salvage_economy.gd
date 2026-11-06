@@ -21,6 +21,15 @@ const PARTS := [
 ]
 const FREE_SHELL_INTERVAL_SECONDS := 1800
 
+static func make_zone_wreck(model_index: int, seed_value: int = 0) -> Dictionary:
+    var wreck: Dictionary = make_wreck(seed_value)
+    var model: Dictionary = CATALOG[clampi(model_index, 0, CATALOG.size() - 1)]
+    wreck["brand"] = model["brand"]
+    wreck["model"] = model["model"]
+    wreck["year"] = model["year"]
+    wreck["shell_value"] = int(model["value"] * 0.2)
+    return wreck
+
 static func make_wreck(seed_value: int = 0) -> Dictionary:
     var rng := RandomNumberGenerator.new()
     if seed_value == 0:
@@ -33,7 +42,7 @@ static func make_wreck(seed_value: int = 0) -> Dictionary:
         if rng.randf() > 0.24:
             components[part] = rng.randi_range(12, 120)
     return {
-        "id": "%d-%d" % [Time.get_unix_time_from_system(), rng.randi()],
+        "id": "%d-%d" % [int(Time.get_unix_time_from_system()), rng.randi()],
         "brand": model["brand"], "model": model["model"], "year": model["year"],
         "shell_value": int(model["value"] * 0.2), "parts": components,
         "restored": false
