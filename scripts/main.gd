@@ -9,6 +9,7 @@ const WorkshopBays = preload("res://scripts/workshop_bays.gd")
 const PlayerProgress = preload("res://scripts/player_progress.gd")
 const JunkyardZones = preload("res://scripts/junkyard_zones.gd")
 const YardStock = preload("res://scripts/yard_stock.gd")
+const VehicleCondition = preload("res://scripts/vehicle_condition.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -130,7 +131,7 @@ func _render_junkyard() -> void:
         _label("All wrecks claimed. Check back after the next stock refresh.")
     for i in range(stock.size()):
         var wreck: Dictionary = stock[i]
-        _label("%s | %d fitted parts | shell $%d" % [Economy.display_name(wreck), wreck.get("parts", {}).size(), Economy.sell_shell(wreck)])
+        _label("%s | %s | shell $%d" % [Economy.display_name(wreck), VehicleCondition.summary(wreck), Economy.sell_shell(wreck)])
         _button("CLAIM FREE: %s" % Economy.display_name(wreck), _claim_stock_wreck.bind(i))
 
 func _select_zone(index: int) -> void:
@@ -222,6 +223,8 @@ func _render_cars() -> void:
         _button("%s  [%s]" % [Economy.display_name(car), "Restored Beauty" if car.get("restored", false) else "Rust Bucket"], _select_car.bind(i))
     var car: Dictionary = cars[selected_car]
     _label("Selected: %s" % Economy.display_name(car))
+    _label("CONDITION: %s" % VehicleCondition.summary(car))
+    _label("Origin: %s" % str(car.get("source_zone", "Unknown yard")))
     var preview = VehiclePreviewScript.new()
     preview.custom_minimum_size = Vector2(560, 220)
     preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -256,6 +259,8 @@ func _render_cars() -> void:
         _label("Driveable: %s" % ("Yes" if Customisation.is_driveable(car) else "No - essential parts missing"))
         _render_spare_parts()
     if current_tab == 8:
+        var missing: Array = VehicleCondition.missing_parts(car)
+        _label("MISSING COMPONENTS (%d): %s" % [missing.size(), ", ".join(missing)])
         for part in car.get("parts", {}).keys():
             _button("Sell %s  ($%d)" % [part, int(car["parts"][part])], _sell_part.bind(part))
     _button("Strip and sell all remaining parts", _strip_car)
