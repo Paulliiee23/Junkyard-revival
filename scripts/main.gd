@@ -311,23 +311,29 @@ func _render_buyer_offer(car: Dictionary) -> void:
         _label("Complete restoration and fit essential parts to request an offer.")
         return
     var id: String = str(car.get("id", ""))
+    var now: int = int(Time.get_unix_time_from_system())
     var offer: Dictionary = buyer_offers.get(id, {})
-    if offer.is_empty():
-        _button("Request buyer offer", _request_buyer_offer)
-    else:
+    if not offer.is_empty() and CarBuyers.valid_offer(car, offer, now):
         _label("%s offers $%d" % [offer.get("buyer", "Buyer"), int(offer.get("amount", 0))])
         _button("Accept buyer offer", _accept_buyer_offer)
         _button("Decline buyer offer", _decline_buyer_offer)
+    elif int(offer_requests.get(id, -1)) == CarBuyers.day_bucket(now):
+        _label("Offer expired, declined, or car changed. New offers available tomorrow.")
+    else:
+        _button("Request buyer offer", _request_buyer_offer)
 
 func _request_buyer_offer() -> void:
     if cars.is_empty():
         return
     var car: Dictionary = cars[selected_car]
-    if CarBuyers.is_ready_for_buyer(car):
-        buyer_offers[str(car.get("id", ""))] = CarBuyers.make_offer(car, int(Time.get_unix_time_from_system()))
+    var id: String = str(car.get("id", ""))
+    var now: int = int(Time.get_unix_time_from_system())
+    if CarBuyers.is_ready_for_buyer(car) and int(offer_requests.get(id, -1)) != CarBuyers.day_bucket(now):
+        buyer_offers[id] = CarBuyers.make_offer(car, now)
+        offer_requests[id] = CarBuyers.day_bucket(now)
         status = "A buyer has made an offer."
     else:
-        status = "Finish restoration and fit essential parts first."
+        status = "Not eligible, or a buyer was already requested today."
     _save_and_render()
 
 func _decline_buyer_offer() -> void:
@@ -343,7 +349,7 @@ func _accept_buyer_offer() -> void:
     var car: Dictionary = cars[selected_car]
     var id: String = str(car.get("id", ""))
     var offer: Dictionary = buyer_offers.get(id, {})
-    if not CarBuyers.is_ready_for_buyer(car) or not CarBuyers.valid_offer(car, offer):
+    if not CarBuyers.is_ready_for_buyer(car) or not CarBuyers.valid_offer(car, offer, int(Time.get_unix_time_from_system())):
         status = "This offer is not valid."
         _save_and_render()
         return
