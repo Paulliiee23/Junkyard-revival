@@ -235,6 +235,7 @@ func _render_cars() -> void:
         _label("Shell: $%d | Fitted parts: $%d | Strip + shell: $%d" % [appraisal["shell"], appraisal["parts"], appraisal["strip_total"]])
         _label("Remaining restoration work: $%d | Estimated restored resale: $%d" % [appraisal["remaining_repairs"], appraisal["restored_resale_estimate"]])
         _label("Estimated restored sale less remaining repairs: $%d (before other costs)" % appraisal["estimated_margin"])
+        _render_buyer_offer(car)
     var preview = VehiclePreviewScript.new()
     preview.custom_minimum_size = Vector2(560, 220)
     preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -302,6 +303,20 @@ func _render_cars() -> void:
     _button("Sell shell only (fitted parts not paid separately)", _sell_shell)
     if not car.get("parts", {}).is_empty():
         _button("Sell ALL fitted parts + shell together", _sell_complete_vehicle)
+
+func _render_buyer_offer(car: Dictionary) -> void:
+    _label("CAR FLIPPING | Local buyers")
+    if not CarBuyers.is_ready_for_buyer(car):
+        _label("Complete restoration and fit essential parts to request an offer.")
+        return
+    var id: String = str(car.get("id", ""))
+    var offer: Dictionary = buyer_offers.get(id, {})
+    if offer.is_empty():
+        _button("Request buyer offer", _request_buyer_offer)
+    else:
+        _label("%s offers $%d" % [offer.get("buyer", "Buyer"), int(offer.get("amount", 0))])
+        _button("Accept buyer offer", _accept_buyer_offer)
+        _button("Decline buyer offer", _decline_buyer_offer)
 
 func _render_spare_parts() -> void:
     _label("Spare parts in storage: %d" % spare_parts.size())
