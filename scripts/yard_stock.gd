@@ -6,7 +6,7 @@ const STOCK_PER_ZONE := 5
 
 static func generate(zone_index: int, timestamp: int) -> Array:
     var result: Array = []
-    var bucket: int = maxi(0, timestamp) / REFRESH_SECONDS
+    var bucket: int = floori(float(maxi(0, timestamp)) / float(REFRESH_SECONDS))
     var rng := RandomNumberGenerator.new()
     rng.seed = int((bucket + 1) * 104729 + (zone_index + 1) * 8191)
     for slot in range(STOCK_PER_ZONE):
@@ -18,7 +18,7 @@ static func generate(zone_index: int, timestamp: int) -> Array:
     return result
 
 static func refresh(stock: Dictionary, now: int) -> void:
-    var bucket: int = maxi(0, now) / REFRESH_SECONDS
+    var bucket: int = floori(float(maxi(0, now)) / float(REFRESH_SECONDS))
     for zone_index in range(JunkyardZones.ZONES.size()):
         var key: String = str(zone_index)
         var entry: Dictionary = stock.get(key, {})
