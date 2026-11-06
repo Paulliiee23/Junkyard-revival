@@ -219,13 +219,27 @@ func _render_cars() -> void:
             _button("Sell %s  ($%d)" % [part, int(car["parts"][part])], _sell_part.bind(part))
     _button("Strip and sell all remaining parts", _strip_car)
     if current_tab == 1 or current_tab == 2:
-        _label("Restoration: %d/%d stages" % [Restoration.restoration_progress(car), Restoration.STAGES.size()])
+        _label("RESTORATION WORKBENCH  |  %d/%d stages" % [Restoration.restoration_progress(car), Restoration.STAGES.size()])
+        var overall := ProgressBar.new()
+        overall.max_value = Restoration.STAGES.size() * 3
+        var completed_tasks := 0
+        for stage in Restoration.STAGES:
+            completed_tasks += Restoration.task_progress(car, stage)
+            if Restoration.stage_cost(car, stage) == 0:
+                completed_tasks += maxi(0, 3 - Restoration.task_progress(car, stage))
+        overall.value = completed_tasks
+        overall.custom_minimum_size.y = 22
+        body.add_child(overall)
         for stage in Restoration.STAGES:
             var cost: int = Restoration.stage_cost(car, stage)
             if cost == 0:
-                _label("%s: complete" % stage)
+                _label("✓ %s: complete" % stage)
             else:
-                _button("Restore %s ($%d)" % [stage, cost], _restore_stage.bind(stage))
+                var progress: int = Restoration.task_progress(car, stage)
+                _label("%s: %d/3 tasks | Stage cost $%d" % [stage, progress, cost])
+                var task: String = Restoration.next_task(car, stage)
+                if not task.is_empty():
+                    _button("WORK: %s" % task, _perform_restoration_task.bind(stage))
         _label("Paint finish: %s" % car.get("paint", "Rust"))
         for paint_name in ["Rust", "Crimson", "Midnight", "Ivory", "Violet", "Lime"]:
             _button("Paint: %s" % paint_name, _paint_car.bind(paint_name))
@@ -309,6 +323,18 @@ func _cycle_part(part: String) -> void:
     else:
         Customisation.set_choice(car, part, next_choice)
         status = "%s set to %s." % [part, next_choice]
+    _save_and_render()
+
+func _perform_restoration_task(stage: String) -> void:
+    if cars.is_empty():
+        return
+    var task: String = Restoration.next_task(cars[selected_car], stage)
+    var spent: int = Restoration.perform_task(cars[selected_car], stage, cash)
+    if spent >= 0:
+        cash -= spent
+        status = "Completed: %s%s" % [task, " ($%d)" % spent if spent > 0 else ""]
+    else:
+        status = "Cannot complete this task yet. Check available cash."
     _save_and_render()
 
 func _restore_stage(stage: String) -> void:
