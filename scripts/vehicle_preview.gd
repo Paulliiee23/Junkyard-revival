@@ -30,6 +30,7 @@ func _draw() -> void:
     var body_progress: int = 3 if restoration.get("Bodywork", false) else clampi(int(tasks.get("Bodywork", 0)), 0, 3)
     var paint_progress: int = 3 if restoration.get("Paint", false) else clampi(int(tasks.get("Paint", 0)), 0, 3)
     var detailing_progress: int = 3 if restoration.get("Detailing", false) else clampi(int(tasks.get("Detailing", 0)), 0, 3)
+    var condition: int = clampi(int(vehicle.get("condition", 30)), 0, 100)
     var installed: Dictionary = vehicle.get("parts", {})
     var choices: Dictionary = vehicle.get("customisation", {})
     # Temporary procedural side profile, not final layered vehicle artwork.
@@ -47,8 +48,14 @@ func _draw() -> void:
     # Surface condition reflects actual saved restoration tasks.
     if body_progress < 3:
         var rust := Color("#98512b") if body_progress == 0 else Color("#b97845")
-        draw_rect(Rect2(left + width * 0.12, top + height * 0.53, width * 0.16, height * 0.14), rust)
-        draw_rect(Rect2(left + width * 0.72, top + height * 0.44, width * 0.13, height * 0.19), rust.darkened(0.2))
+        var severity: float = clampf(float(100 - condition) / 100.0, 0.08, 1.0)
+        var coverage: float = severity * (1.0 - float(body_progress) * 0.27)
+        draw_rect(Rect2(left + width * 0.12, top + height * 0.53, width * 0.20 * coverage, height * 0.14), rust)
+        draw_rect(Rect2(left + width * 0.72, top + height * 0.44, width * 0.17 * coverage, height * 0.19), rust.darkened(0.2))
+        if condition < 35 and body_progress == 0:
+            draw_line(Vector2(left + width * 0.40, top + height * 0.53),
+                Vector2(left + width * 0.52, top + height * 0.67),
+                Color("#31211b"), 3.0)
     if paint_progress == 1:
         draw_rect(Rect2(left + width * 0.32, top + height * 0.37, width * 0.34, height * 0.36), Color("#85827c"))
     elif paint_progress == 2:
