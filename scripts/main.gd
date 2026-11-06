@@ -2,6 +2,7 @@ extends Control
 
 const Economy = preload("res://scripts/salvage_economy.gd")
 const Restoration = preload("res://scripts/restoration.gd")
+const Customisation = preload("res://scripts/customisation.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -93,7 +94,12 @@ func _render_cars() -> void:
     var car: Dictionary = cars[selected_car]
     _label("Selected: %s" % Economy.display_name(car))
     _label("%d removable parts remaining" % car.get("parts", {}).size())
-    if current_tab == 2 or current_tab == 8:
+    if current_tab == 2:
+        _label("Select a category and choose None to remove it from the build.")
+        for part in Economy.PARTS:
+            _button("%s: %s" % [part, Customisation.selected_choice(car, part)], _cycle_part.bind(part))
+        _label("Driveable: %s" % ("Yes" if Customisation.is_driveable(car) else "No - essential parts missing"))
+    if current_tab == 8:
         for part in car.get("parts", {}).keys():
             _button("Sell %s  ($%d)" % [part, int(car["parts"][part])], _sell_part.bind(part))
     _button("Strip and sell all remaining parts", _strip_car)
@@ -109,6 +115,18 @@ func _render_cars() -> void:
         for paint_name in ["Rust", "Crimson", "Midnight", "Ivory", "Violet", "Lime"]:
             _button("Paint: %s" % paint_name, _paint_car.bind(paint_name))
     _button("Sell bare shell and remove vehicle", _sell_shell)
+
+func _cycle_part(part: String) -> void:
+    if cars.is_empty():
+        return
+    var car: Dictionary = cars[selected_car]
+    var choices: Array = Customisation.choices_for(part)
+    var current: String = Customisation.selected_choice(car, part)
+    var next_index: int = (choices.find(current) + 1) % choices.size()
+    var next_choice: String = str(choices[next_index])
+    Customisation.set_choice(car, part, next_choice)
+    status = "%s set to %s." % [part, next_choice]
+    _save_and_render()
 
 func _restore_stage(stage: String) -> void:
     if cars.is_empty():
