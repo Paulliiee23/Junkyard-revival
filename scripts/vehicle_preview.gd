@@ -25,6 +25,11 @@ func _draw() -> void:
     var top := h * 0.30
     var width := w * 0.72
     var height := h * 0.43
+    var restoration: Dictionary = vehicle.get("restoration", {})
+    var tasks: Dictionary = vehicle.get("restoration_tasks", {})
+    var body_progress: int = 3 if restoration.get("Bodywork", false) else clampi(int(tasks.get("Bodywork", 0)), 0, 3)
+    var paint_progress: int = 3 if restoration.get("Paint", false) else clampi(int(tasks.get("Paint", 0)), 0, 3)
+    var detailing_progress: int = 3 if restoration.get("Detailing", false) else clampi(int(tasks.get("Detailing", 0)), 0, 3)
     var installed: Dictionary = vehicle.get("parts", {})
     var choices: Dictionary = vehicle.get("customisation", {})
     # Temporary procedural side profile, not final layered vehicle artwork.
@@ -39,6 +44,15 @@ func _draw() -> void:
         draw_rect(Rect2(left, top + height * 0.70, width * 0.08, height * 0.14), Color("#171615"))
     if not installed.has("Rear Bumper") or str(choices.get("Rear Bumper", "Factory")) == "None":
         draw_rect(Rect2(left + width * 0.92, top + height * 0.70, width * 0.08, height * 0.14), Color("#171615"))
+    # Surface condition reflects actual saved restoration tasks.
+    if body_progress < 3:
+        var rust := Color("#98512b") if body_progress == 0 else Color("#b97845")
+        draw_rect(Rect2(left + width * 0.12, top + height * 0.53, width * 0.16, height * 0.14), rust)
+        draw_rect(Rect2(left + width * 0.72, top + height * 0.44, width * 0.13, height * 0.19), rust.darkened(0.2))
+    if paint_progress == 1:
+        draw_rect(Rect2(left + width * 0.32, top + height * 0.37, width * 0.34, height * 0.36), Color("#85827c"))
+    elif paint_progress == 2:
+        draw_rect(Rect2(left + width * 0.32, top + height * 0.37, width * 0.34, height * 0.36), Color("#b8b4a7"))
     draw_colored_polygon(PackedVector2Array([
         Vector2(left + width * 0.20, top + height * 0.34),
         Vector2(left + width * 0.36, top),
@@ -60,3 +74,9 @@ func _draw() -> void:
         draw_rect(Rect2(left + width * 0.45, top - 10, width * 0.13, 10), Color("#252529"))
     if installed.has("Neon") and str(choices.get("Neon", "None")) != "None":
         draw_line(Vector2(left + width * 0.28, top + height * 0.94), Vector2(left + width * 0.74, top + height * 0.94), Color("#a65dff"), 6.0)
+
+    # A subtle polish highlight appears as detailing is completed.
+    if detailing_progress >= 2:
+        draw_line(Vector2(left + width * 0.12, top + height * 0.47),
+            Vector2(left + width * 0.29, top + height * 0.47),
+            Color("#f2e7d3", 0.35 if detailing_progress == 2 else 0.75), 3.0)
