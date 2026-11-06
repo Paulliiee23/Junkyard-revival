@@ -22,7 +22,10 @@ const CHOICES := {
 
 static func choices_for(part: String) -> Array:
     if CHOICES.has(part):
-        return CHOICES[part].duplicate()
+        var options: Array = CHOICES[part].duplicate()
+        if not options.has("Factory"):
+            options.insert(1, "Factory")
+        return options
     return ["None", "Factory", "Custom"]
 
 static func set_choice(car: Dictionary, part: String, choice: String) -> bool:
