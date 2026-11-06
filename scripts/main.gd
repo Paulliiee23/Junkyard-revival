@@ -10,6 +10,7 @@ const PlayerProgress = preload("res://scripts/player_progress.gd")
 const JunkyardZones = preload("res://scripts/junkyard_zones.gd")
 const YardStock = preload("res://scripts/yard_stock.gd")
 const VehicleCondition = preload("res://scripts/vehicle_condition.gd")
+const VehicleAppraisal = preload("res://scripts/vehicle_appraisal.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -225,6 +226,12 @@ func _render_cars() -> void:
     _label("Selected: %s" % Economy.display_name(car))
     _label("CONDITION: %s" % VehicleCondition.summary(car))
     _label("Origin: %s" % str(car.get("source_zone", "Unknown yard")))
+    if current_tab == 8:
+        var appraisal: Dictionary = VehicleAppraisal.estimate(car)
+        _label("VEHICLE APPRAISAL | Estimates, not guaranteed sale prices")
+        _label("Shell: $%d | Fitted parts: $%d | Strip + shell: $%d" % [appraisal["shell"], appraisal["parts"], appraisal["strip_total"]])
+        _label("Remaining restoration work: $%d | Estimated restored resale: $%d" % [appraisal["remaining_repairs"], appraisal["restored_resale_estimate"]])
+        _label("Estimated restored sale less remaining repairs: $%d (before other costs)" % appraisal["estimated_margin"])
     var preview = VehiclePreviewScript.new()
     preview.custom_minimum_size = Vector2(560, 220)
     preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
