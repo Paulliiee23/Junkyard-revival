@@ -559,7 +559,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "selected_zone": selected_zone, "yard_stock": yard_stock, "cash": cash, "level": level, "xp": xp, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
+        file.store_string(JSON.stringify({"tab": current_tab, "selected_zone": selected_zone, "yard_stock": yard_stock, "buyer_offers": buyer_offers, "sold_cars": sold_cars, "cash": cash, "level": level, "xp": xp, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -574,6 +574,10 @@ func _load_game() -> void:
         var saved_stock = data.get("yard_stock", {})
         if saved_stock is Dictionary:
             yard_stock = saved_stock
+        var saved_offers = data.get("buyer_offers", {})
+        if saved_offers is Dictionary:
+            buyer_offers = saved_offers
+        sold_cars = maxi(0, int(data.get("sold_cars", 0)))
         cash = int(data.get("cash", 5000))
         level = maxi(1, int(data.get("level", 1)))
         xp = maxi(0, int(data.get("xp", 0)))
