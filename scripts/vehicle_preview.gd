@@ -1,6 +1,7 @@
 extends Control
 class_name VehiclePreview
 
+const VehicleArtwork = preload("res://scripts/vehicle_artwork.gd")
 var vehicle: Dictionary = {}
 
 func set_vehicle(data: Dictionary) -> void:
@@ -13,6 +14,15 @@ func _draw() -> void:
     var w: float = bounds.size.x
     var h: float = bounds.size.y
     if w < 100.0 or h < 80.0:
+        return
+    var sprite: Texture2D = VehicleArtwork.sprite_for(vehicle)
+    if sprite != null:
+        var available := Vector2(w * 0.90, h * 0.85)
+        var original := sprite.get_size()
+        var scale_factor: float = minf(available.x / maxf(original.x, 1.0), available.y / maxf(original.y, 1.0))
+        var rendered := original * scale_factor
+        var destination := Rect2((Vector2(w, h) - rendered) * 0.5, rendered)
+        draw_texture_rect(sprite, destination, false)
         return
     var base := Color("#8e4c32")
     match str(vehicle.get("paint", "Rust")):
