@@ -14,6 +14,8 @@ var cars: Array[Dictionary] = []
 var spare_parts: Array = []
 var selected_car := 0
 var garage_bay := 0
+var storage_filter := "All"
+var selected_category := "Spoiler"
 var status := "Welcome to Junkyard Revival."
 var root: VBoxContainer
 var header: Label
@@ -75,17 +77,61 @@ func _render() -> void:
             _label("Free salvage: claim a wreck, strip it, restore it, or sell everything.")
             _button("Claim free junkyard wreck", _claim_wreck)
         1:
-            _label("Restoration bay %d of 3" % (garage_bay + 1))
-            _button("Switch garage bay", _next_bay)
+            _render_workshop()
             _render_cars()
         7:
-            _label("Rust Bucket / Restored Beauty storage")
-            _render_cars()
+            _label("VEHICLE STORAGE  |  Rust Bucket / Restored Beauty")
+            _render_storage()
             _render_spare_parts()
         2, 8:
             _render_cars()
         _:
             _label("This feature is planned and not implemented yet.")
+
+func _render_workshop() -> void:
+    _label("WORKSHOP  |  Three restoration bays")
+    var bay_row := HBoxContainer.new()
+    body.add_child(bay_row)
+    for i in range(3):
+        var button := Button.new()
+        button.text = "BAY %d%s" % [i + 1, "  [ACTIVE]" if garage_bay == i else ""]
+        button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        button.pressed.connect(_select_bay.bind(i))
+        bay_row.add_child(button)
+    _label("Choose a vehicle below to inspect, restore, strip, or sell. No penalties.")
+
+func _select_bay(index: int) -> void:
+    garage_bay = clampi(index, 0, 2)
+    status = "Workshop bay %d selected." % (garage_bay + 1)
+    _save_and_render()
+
+func _render_storage() -> void:
+    var filter_row := HBoxContainer.new()
+    body.add_child(filter_row)
+    for filter_name in ["All", "Rust Bucket", "Restored Beauty"]:
+        var button := Button.new()
+        button.text = filter_name
+        button.disabled = storage_filter == filter_name
+        button.pressed.connect(_set_storage_filter.bind(filter_name))
+        filter_row.add_child(button)
+    var matches := 0
+    for i in range(cars.size()):
+        var car: Dictionary = cars[i]
+        var category := "Restored Beauty" if car.get("restored", false) else "Rust Bucket"
+        if storage_filter == "All" or storage_filter == category:
+            matches += 1
+            _button("%s | %s" % [Economy.display_name(car), category], _open_stored_car.bind(i))
+    _label("Showing %d of %d vehicles" % [matches, cars.size()])
+
+func _set_storage_filter(filter_name: String) -> void:
+    storage_filter = filter_name
+    _save_and_render()
+
+func _open_stored_car(index: int) -> void:
+    selected_car = index
+    current_tab = 1
+    status = "Vehicle moved into workshop view."
+    _save_and_render()
 
 func _render_cars() -> void:
     if cars.is_empty():
@@ -105,6 +151,7 @@ func _render_cars() -> void:
     _label("%d removable parts remaining" % car.get("parts", {}).size())
     if current_tab == 2:
         _label("Remove a part to storage, or select a fitted part style.")
+        _label("SELECT A PART STYLE  |  None is always available")
         for part in car.get("parts", {}).keys():
             _button("Detach %s (keep in storage)" % part, _detach_part.bind(part))
         for part in Economy.PARTS:
@@ -286,7 +333,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts}))
+        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -301,6 +348,7 @@ func _load_game() -> void:
         level = int(data.get("level", 1))
         selected_car = int(data.get("selected", 0))
         garage_bay = clampi(int(data.get("bay", 0)), 0, 2)
+        storage_filter = str(data.get("storage_filter", "All"))
         var saved_spares = data.get("spare_parts", [])
         if saved_spares is Array:
             spare_parts = saved_spares
