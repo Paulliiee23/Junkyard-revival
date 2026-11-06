@@ -108,7 +108,21 @@ func _render_cars() -> void:
         for part in car.get("parts", {}).keys():
             _button("Detach %s (keep in storage)" % part, _detach_part.bind(part))
         for part in Economy.PARTS:
-            _button("%s: %s" % [part, Customisation.selected_choice(car, part)], _cycle_part.bind(part))
+            var row := HBoxContainer.new()
+            body.add_child(row)
+            var name_label := Label.new()
+            name_label.text = part
+            name_label.custom_minimum_size.x = 190
+            row.add_child(name_label)
+            var selector := OptionButton.new()
+            selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+            var choices: Array = Customisation.choices_for(part)
+            for choice in choices:
+                selector.add_item(str(choice))
+            var selected_index: int = choices.find(Customisation.selected_choice(car, part))
+            selector.select(maxi(0, selected_index))
+            selector.item_selected.connect(_choose_part.bind(part))
+            row.add_child(selector)
         _label("Driveable: %s" % ("Yes" if Customisation.is_driveable(car) else "No - essential parts missing"))
         _render_spare_parts()
     if current_tab == 8:
@@ -157,6 +171,28 @@ func _fit_spare(index: int) -> void:
         status = "Installed stored part."
     else:
         status = "Cannot fit this part: category already occupied or item unavailable."
+    _save_and_render()
+
+func _choose_part(index: int, part: String) -> void:
+    if cars.is_empty():
+        return
+    var car: Dictionary = cars[selected_car]
+    var choices: Array = Customisation.choices_for(part)
+    if index < 0 or index >= choices.size():
+        return
+    var next_choice: String = str(choices[index])
+    if next_choice == "None":
+        if car.get("parts", {}).has(part):
+            PartsInventory.detach(car, part, spare_parts)
+            status = "Removed %s to storage." % part
+        else:
+            Customisation.set_choice(car, part, "None")
+            status = "%s: None." % part
+    elif not car.get("parts", {}).has(part):
+        status = "Fit a %s from spare-parts storage first." % part
+    else:
+        Customisation.set_choice(car, part, next_choice)
+        status = "%s set to %s." % [part, next_choice]
     _save_and_render()
 
 func _cycle_part(part: String) -> void:
