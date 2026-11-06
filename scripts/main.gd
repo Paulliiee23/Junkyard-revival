@@ -72,6 +72,8 @@ func _render() -> void:
         child.queue_free()
     _label(TABS[current_tab].to_upper())
     _label(status)
+    if current_tab == 7 and cars.is_empty():
+        _label("No vehicles in storage yet. Spare parts can still be managed below.")
     match current_tab:
         0:
             _label("Free salvage: claim a wreck, strip it, restore it, or sell everything.")
@@ -136,6 +138,8 @@ func _open_stored_car(index: int) -> void:
 func _render_cars() -> void:
     if cars.is_empty():
         _label("No vehicles in storage. Claim a free wreck in Junkyard.")
+        if current_tab == 2:
+            _render_spare_parts()
         return
     selected_car = clampi(selected_car, 0, cars.size() - 1)
     for i in range(cars.size()):
@@ -149,6 +153,7 @@ func _render_cars() -> void:
     body.add_child(preview)
     preview.set_vehicle(car)
     _label("%d removable parts remaining" % car.get("parts", {}).size())
+    _label("Shell resale: $%d  |  Installed parts: %d" % [Economy.sell_shell(car), car.get("parts", {}).size()])
     if current_tab == 2:
         _label("Remove a part to storage, or select a fitted part style.")
         _label("SELECT A PART STYLE  |  None is always available")
@@ -300,6 +305,7 @@ func _sell_part(part: String) -> void:
     if cars.is_empty():
         return
     var payout: int = Economy.sell_part(cars[selected_car], part)
+    Customisation.set_choice(cars[selected_car], part, "None")
     cash += payout
     status = "Sold %s for $%d. No penalties." % [part, payout]
     _save_and_render()
@@ -308,6 +314,8 @@ func _strip_car() -> void:
     if cars.is_empty():
         return
     var payout: int = Economy.strip_all(cars[selected_car])
+    for part in Economy.PARTS:
+        Customisation.set_choice(cars[selected_car], part, "None")
     cash += payout
     status = "Sold remaining parts for $%d." % payout
     _save_and_render()
