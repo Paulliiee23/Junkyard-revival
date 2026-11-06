@@ -116,6 +116,7 @@ func _button(title: String, callback: Callable) -> void:
 func _render() -> void:
     root.visible = current_tab != 0
     concept_screen.visible = current_tab == 0
+    concept_screen.update_hud(level, xp, PlayerProgress.required_xp(level), cash)
     header.text = "JUNKYARD REVIVAL | LV %d (%d/%d XP) | $%d | %d/%d cars" % [level, xp, PlayerProgress.required_xp(level), cash, cars.size(), MAX_STORAGE]
     for child in body.get_children():
         body.remove_child(child)
