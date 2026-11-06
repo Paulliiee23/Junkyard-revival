@@ -36,22 +36,28 @@ func _build_ui() -> void:
     root = VBoxContainer.new()
     root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     root.add_theme_constant_override("separation", 12)
+    root.offset_left = 20.0
+    root.offset_top = 12.0
+    root.offset_right = -20.0
+    root.offset_bottom = -12.0
     add_child(root)
     header = Label.new()
-    header.add_theme_font_size_override("font_size", 30)
+    header.add_theme_font_size_override("font_size", 28)
+    header.add_theme_color_override("font_color", Color("#e9c98b"))
     root.add_child(header)
     var scroll := ScrollContainer.new()
     scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
     root.add_child(scroll)
     body = VBoxContainer.new()
     body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    body.add_theme_constant_override("separation", 8)
+    body.add_theme_constant_override("separation", 10)
     scroll.add_child(body)
     var nav := HFlowContainer.new()
     root.add_child(nav)
     for i in range(TABS.size()):
         var button := Button.new()
         button.text = TABS[i]
+        button.custom_minimum_size = Vector2(110, 46)
         button.pressed.connect(_change_tab.bind(i))
         nav.add_child(button)
 
@@ -59,11 +65,13 @@ func _label(value: String) -> void:
     var label := Label.new()
     label.text = value
     label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    label.add_theme_color_override("font_color", Color("#e8dfd3"))
     body.add_child(label)
 
 func _button(title: String, callback: Callable) -> void:
     var button := Button.new()
     button.text = title
+    button.custom_minimum_size.y = 42
     button.pressed.connect(callback)
     body.add_child(button)
 
@@ -72,7 +80,7 @@ func _render() -> void:
     for child in body.get_children():
         body.remove_child(child)
         child.queue_free()
-    _label(TABS[current_tab].to_upper())
+    _label("────────────────  %s  ────────────────" % TABS[current_tab].to_upper())
     _label(status)
     if current_tab == 7 and cars.is_empty():
         _label("No vehicles in storage yet. Spare parts can still be managed below.")
