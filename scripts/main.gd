@@ -97,6 +97,10 @@ func _concept_claim(index: int) -> void:
         status = "No wrecks available until the next refresh."
         _render()
         return
+    if index >= stock.size():
+        status = "This salvage slot is empty."
+        _render()
+        return
     _claim_stock_wreck((concept_slot + index) % stock.size())
 
 func _label(value: String) -> void:
@@ -117,6 +121,8 @@ func _render() -> void:
     root.visible = current_tab != 0
     concept_screen.visible = current_tab == 0
     concept_screen.update_hud(level, xp, PlayerProgress.required_xp(level), cash)
+    var visible_stock: Array = yard_stock.get(str(selected_zone), {}).get("cars", [])
+    concept_screen.update_stock(visible_stock, concept_slot, JunkyardZones.zone_name(selected_zone))
     header.text = "JUNKYARD REVIVAL | LV %d (%d/%d XP) | $%d | %d/%d cars" % [level, xp, PlayerProgress.required_xp(level), cash, cars.size(), MAX_STORAGE]
     for child in body.get_children():
         body.remove_child(child)
