@@ -16,6 +16,14 @@ func _ready() -> void:
     art.stretch_mode = TextureRect.STRETCH_SCALE
     art.mouse_filter = Control.MOUSE_FILTER_IGNORE
     add_child(art)
+    var hud_back := ColorRect.new()
+    hud_back.color = Color("#111315")
+    hud_back.anchor_left = 0.20
+    hud_back.anchor_top = 0.008
+    hud_back.anchor_right = 0.73
+    hud_back.anchor_bottom = 0.085
+    hud_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    add_child(hud_back)
     live_hud = Label.new()
     live_hud.anchor_left = 0.20
     live_hud.anchor_top = 0.008
