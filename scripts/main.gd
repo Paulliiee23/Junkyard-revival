@@ -4,6 +4,7 @@ const Economy = preload("res://scripts/salvage_economy.gd")
 const Restoration = preload("res://scripts/restoration.gd")
 const Customisation = preload("res://scripts/customisation.gd")
 const PartsInventory = preload("res://scripts/parts_inventory.gd")
+const VehiclePreviewScript = preload("res://scripts/vehicle_preview.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -96,6 +97,12 @@ func _render_cars() -> void:
         _button("%s  [%s]" % [Economy.display_name(car), "Restored Beauty" if car.get("restored", false) else "Rust Bucket"], _select_car.bind(i))
     var car: Dictionary = cars[selected_car]
     _label("Selected: %s" % Economy.display_name(car))
+    var preview := Control.new()
+    preview.set_script(VehiclePreviewScript)
+    preview.custom_minimum_size = Vector2(560, 220)
+    preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    body.add_child(preview)
+    preview.set_vehicle(car)
     _label("%d removable parts remaining" % car.get("parts", {}).size())
     if current_tab == 2:
         _label("Remove a part to storage, or select a fitted part style.")
