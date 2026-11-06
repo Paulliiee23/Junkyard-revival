@@ -34,3 +34,5 @@ jobs:
         run: godot --headless --path . --script res://tests/test_player_progress.gd
       - name: Run junkyard zone tests
         run: godot --headless --path . --script res://tests/test_junkyard_zones.gd
+      - name: Run junkyard stock tests
+        run: godot --headless --path . --script res://tests/test_yard_stock.gd
