@@ -84,6 +84,9 @@ func _draw() -> void:
 
     # A subtle polish highlight appears as detailing is completed.
     if detailing_progress >= 2:
-        draw_line(Vector2(left + width * 0.12, top + height * 0.47),
-            Vector2(left + width * 0.29, top + height * 0.47),
-            Color(Color("#f2e7d3"), 0.35 if detailing_progress == 2 else 0.75), 3.0)
+        var polish_alpha: float = 0.35 if detailing_progress == 2 else 0.75
+        var polish_color := Color("#f2e7d3")
+        polish_color.a = polish_alpha
+        var polish_start := Vector2(left + width * 0.12, top + height * 0.47)
+        var polish_end := Vector2(left + width * 0.29, top + height * 0.47)
+        draw_line(polish_start, polish_end, polish_color, 3.0)
