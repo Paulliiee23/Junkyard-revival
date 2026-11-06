@@ -13,6 +13,7 @@ const VehicleCondition = preload("res://scripts/vehicle_condition.gd")
 const VehicleAppraisal = preload("res://scripts/vehicle_appraisal.gd")
 const CarBuyers = preload("res://scripts/car_buyers.gd")
 const JunkyardBackdrop = preload("res://scripts/junkyard_backdrop.gd")
+const ConceptScreen = preload("res://scripts/concept_screen.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -35,11 +36,14 @@ var status := "Welcome to Junkyard Revival."
 var root: VBoxContainer
 var header: Label
 var body: VBoxContainer
+var concept_screen: Control
+var concept_slot := 0
 
 func _ready() -> void:
     _load_game()
     YardStock.refresh(yard_stock, int(Time.get_unix_time_from_system()))
     _build_ui()
+    _build_concept_screen()
     _render()
 
 func _build_ui() -> void:
@@ -75,6 +79,26 @@ func _build_ui() -> void:
         button.pressed.connect(_change_tab.bind(i))
         nav.add_child(button)
 
+func _build_concept_screen() -> void:
+    concept_screen = ConceptScreen.new()
+    add_child(concept_screen)
+    concept_screen.tab_requested.connect(_change_tab)
+    concept_screen.wreck_requested.connect(_concept_claim)
+    concept_screen.page_requested.connect(_concept_page)
+
+func _concept_page(direction: int) -> void:
+    var stock: Array = yard_stock.get(str(selected_zone), {}).get("cars", [])
+    concept_slot = posmod(concept_slot + direction, maxi(stock.size(), 1))
+    _render()
+
+func _concept_claim(index: int) -> void:
+    var stock: Array = yard_stock.get(str(selected_zone), {}).get("cars", [])
+    if stock.is_empty():
+        status = "No wrecks available until the next refresh."
+        _render()
+        return
+    _claim_stock_wreck((concept_slot + index) % stock.size())
+
 func _label(value: String) -> void:
     var label := Label.new()
     label.text = value
@@ -90,6 +114,8 @@ func _button(title: String, callback: Callable) -> void:
     body.add_child(button)
 
 func _render() -> void:
+    root.visible = current_tab != 0
+    concept_screen.visible = current_tab == 0
     header.text = "JUNKYARD REVIVAL | LV %d (%d/%d XP) | $%d | %d/%d cars" % [level, xp, PlayerProgress.required_xp(level), cash, cars.size(), MAX_STORAGE]
     for child in body.get_children():
         body.remove_child(child)
