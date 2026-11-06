@@ -64,7 +64,10 @@ static func strip_all(car: Dictionary) -> int:
     return payout
 
 static func sell_shell(car: Dictionary) -> int:
-    return maxi(1, int(car.get("shell_value", 1)))
+    var base_value: int = maxi(1, int(car.get("shell_value", 1)))
+    var condition: int = clampi(int(car.get("condition", 30)), 0, 100)
+    var multiplier: float = clampf(1.0 + (float(condition) - 30.0) * 0.005, 0.85, 1.35)
+    return maxi(1, roundi(float(base_value) * multiplier))
 
 static func display_name(car: Dictionary) -> String:
     return "%s %s (%d)" % [car.get("brand", "?"), car.get("model", "?"), int(car.get("year", 0))]
