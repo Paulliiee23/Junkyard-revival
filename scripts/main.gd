@@ -318,6 +318,45 @@ func _render_buyer_offer(car: Dictionary) -> void:
         _button("Accept buyer offer", _accept_buyer_offer)
         _button("Decline buyer offer", _decline_buyer_offer)
 
+func _request_buyer_offer() -> void:
+    if cars.is_empty():
+        return
+    var car: Dictionary = cars[selected_car]
+    if CarBuyers.is_ready_for_buyer(car):
+        buyer_offers[str(car.get("id", ""))] = CarBuyers.make_offer(car, int(Time.get_unix_time_from_system()))
+        status = "A buyer has made an offer."
+    else:
+        status = "Finish restoration and fit essential parts first."
+    _save_and_render()
+
+func _decline_buyer_offer() -> void:
+    if cars.is_empty():
+        return
+    buyer_offers.erase(str(cars[selected_car].get("id", "")))
+    status = "Offer declined. The car stays yours."
+    _save_and_render()
+
+func _accept_buyer_offer() -> void:
+    if cars.is_empty():
+        return
+    var car: Dictionary = cars[selected_car]
+    var id: String = str(car.get("id", ""))
+    var offer: Dictionary = buyer_offers.get(id, {})
+    if not CarBuyers.is_ready_for_buyer(car) or not CarBuyers.valid_offer(car, offer):
+        status = "This offer is not valid."
+        _save_and_render()
+        return
+    var payout: int = int(offer["amount"])
+    cash += payout
+    sold_cars += 1
+    buyer_offers.erase(id)
+    cars.remove_at(selected_car)
+    bay_assignments = WorkshopBays.normalise(bay_assignments, cars)
+    selected_car = maxi(0, selected_car - 1)
+    _award_xp(100)
+    status = "Sold to %s for $%d!" % [offer.get("buyer", "buyer"), payout]
+    _save_and_render()
+
 func _render_spare_parts() -> void:
     _label("Spare parts in storage: %d" % spare_parts.size())
     for i in range(spare_parts.size()):
