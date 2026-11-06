@@ -8,10 +8,12 @@ const VehiclePreviewScript = preload("res://scripts/vehicle_preview.gd")
 const WorkshopBays = preload("res://scripts/workshop_bays.gd")
 const PlayerProgress = preload("res://scripts/player_progress.gd")
 const JunkyardZones = preload("res://scripts/junkyard_zones.gd")
+const YardStock = preload("res://scripts/yard_stock.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
 var selected_zone := 0
+var yard_stock: Dictionary = {}
 var cash := 5000
 var level := 1
 var xp := 0
@@ -29,6 +31,7 @@ var body: VBoxContainer
 
 func _ready() -> void:
     _load_game()
+    YardStock.refresh(yard_stock, int(Time.get_unix_time_from_system()))
     _build_ui()
     _render()
 
@@ -118,8 +121,17 @@ func _render_junkyard() -> void:
         button.disabled = not unlocked
         button.pressed.connect(_select_zone.bind(i))
         body.add_child(button)
-    _label("Selected yard: %s" % JunkyardZones.zone_name(selected_zone))
-    _button("Claim a FREE wreck from this yard", _claim_wreck)
+    var now: int = int(Time.get_unix_time_from_system())
+    YardStock.refresh(yard_stock, now)
+    _label("Selected yard: %s | Next stock refresh in %d min" % [JunkyardZones.zone_name(selected_zone), ceili(float(YardStock.seconds_until_refresh(now)) / 60.0)])
+    var entry: Dictionary = yard_stock.get(str(selected_zone), {})
+    var stock: Array = entry.get("cars", [])
+    if stock.is_empty():
+        _label("All wrecks claimed. Check back after the next stock refresh.")
+    for i in range(stock.size()):
+        var wreck: Dictionary = stock[i]
+        _label("%s | %d fitted parts | shell $%d" % [Economy.display_name(wreck), wreck.get("parts", {}).size(), Economy.sell_shell(wreck)])
+        _button("CLAIM FREE: %s" % Economy.display_name(wreck), _claim_stock_wreck.bind(i))
 
 func _select_zone(index: int) -> void:
     if not JunkyardZones.unlocked(index, level):
@@ -395,20 +407,20 @@ func _paint_car(paint_name: String) -> void:
         status = "Selected %s paint finish." % paint_name
     _save_and_render()
 
-func _claim_wreck() -> void:
+func _claim_stock_wreck(slot: int) -> void:
     if cars.size() >= MAX_STORAGE:
         status = "Storage full. Sell a car to make room."
+    elif not JunkyardZones.unlocked(selected_zone, level):
+        status = "This junkyard zone is locked."
     else:
-        if not JunkyardZones.unlocked(selected_zone, level):
-            selected_zone = 0
-        var rng := RandomNumberGenerator.new()
-        rng.randomize()
-        var model_index: int = JunkyardZones.pick_model_index(selected_zone, rng)
-        var wreck: Dictionary = Economy.make_zone_wreck(model_index)
-        wreck["source_zone"] = JunkyardZones.zone_name(selected_zone)
-        cars.append(wreck)
-        selected_car = cars.size() - 1
-        status = "Claimed %s for free!" % Economy.display_name(wreck)
+        YardStock.refresh(yard_stock, int(Time.get_unix_time_from_system()))
+        var wreck: Dictionary = YardStock.take(yard_stock, selected_zone, slot)
+        if wreck.is_empty():
+            status = "That wreck is no longer available."
+        else:
+            cars.append(wreck)
+            selected_car = cars.size() - 1
+            status = "Claimed %s for free from %s!" % [Economy.display_name(wreck), JunkyardZones.zone_name(selected_zone)]
     _save_and_render()
 
 func _select_car(index: int) -> void:
@@ -478,7 +490,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "selected_zone": selected_zone, "cash": cash, "level": level, "xp": xp, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
+        file.store_string(JSON.stringify({"tab": current_tab, "selected_zone": selected_zone, "yard_stock": yard_stock, "cash": cash, "level": level, "xp": xp, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -490,6 +502,9 @@ func _load_game() -> void:
     if data is Dictionary:
         current_tab = clampi(int(data.get("tab", 0)), 0, TABS.size() - 1)
         selected_zone = clampi(int(data.get("selected_zone", 0)), 0, JunkyardZones.ZONES.size() - 1)
+        var saved_stock = data.get("yard_stock", {})
+        if saved_stock is Dictionary:
+            yard_stock = saved_stock
         cash = int(data.get("cash", 5000))
         level = maxi(1, int(data.get("level", 1)))
         xp = maxi(0, int(data.get("xp", 0)))
