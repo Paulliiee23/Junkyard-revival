@@ -115,12 +115,16 @@ func _render() -> void:
 
 func _render_junkyard() -> void:
     var scene_panel := PanelContainer.new()
-    scene_panel.custom_minimum_size = Vector2(0, 320)
+    scene_panel.custom_minimum_size = Vector2(0, 520)
     scene_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     body.add_child(scene_panel)
-    var yard_view := JunkyardBackdrop.new()
-    yard_view.custom_minimum_size = Vector2(0, 320)
-    scene_panel.add_child(yard_view)
+    var artwork := TextureRect.new()
+    artwork.texture = load("res://assets/junkyard_reference.png.png")
+    artwork.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+    artwork.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+    artwork.custom_minimum_size = Vector2(0, 520)
+    artwork.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    scene_panel.add_child(artwork)
     _label("SALVAGE YARD | Choose a zone and inspect available wrecks")
     for i in range(JunkyardZones.ZONES.size()):
         var zone: Dictionary = JunkyardZones.ZONES[i]
