@@ -531,6 +531,7 @@ func _sell_complete_vehicle() -> void:
     var shell_payout: int = Economy.sell_shell(cars[selected_car])
     cash += part_payout + shell_payout
     _award_xp(PlayerProgress.salvage_xp(count))
+    buyer_offers.erase(str(cars[selected_car].get("id", "")))
     cars.remove_at(selected_car)
     bay_assignments = WorkshopBays.normalise(bay_assignments, cars)
     selected_car = maxi(0, selected_car - 1)
@@ -542,6 +543,7 @@ func _sell_shell() -> void:
         return
     var payout: int = Economy.sell_shell(cars[selected_car])
     cash += payout
+    buyer_offers.erase(str(cars[selected_car].get("id", "")))
     cars.remove_at(selected_car)
     bay_assignments = WorkshopBays.normalise(bay_assignments, cars)
     selected_car = maxi(0, selected_car - 1)
