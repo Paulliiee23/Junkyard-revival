@@ -42,3 +42,5 @@ jobs:
         run: godot --headless --path . --script res://tests/test_condition_economy.gd
       - name: Run vehicle appraisal tests
         run: godot --headless --path . --script res://tests/test_vehicle_appraisal.gd
+      - name: Run buyer offer tests
+        run: godot --headless --path . --script res://tests/test_car_buyers.gd
