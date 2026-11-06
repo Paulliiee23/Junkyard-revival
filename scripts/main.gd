@@ -6,11 +6,13 @@ const Customisation = preload("res://scripts/customisation.gd")
 const PartsInventory = preload("res://scripts/parts_inventory.gd")
 const VehiclePreviewScript = preload("res://scripts/vehicle_preview.gd")
 const WorkshopBays = preload("res://scripts/workshop_bays.gd")
+const PlayerProgress = preload("res://scripts/player_progress.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
 var cash := 5000
 var level := 1
+var xp := 0
 var cars: Array[Dictionary] = []
 var spare_parts: Array = []
 var selected_car := 0
@@ -76,7 +78,7 @@ func _button(title: String, callback: Callable) -> void:
     body.add_child(button)
 
 func _render() -> void:
-    header.text = "JUNKYARD REVIVAL   |   LV %d   |   $%d   |   %d/%d cars" % [level, cash, cars.size(), MAX_STORAGE]
+    header.text = "JUNKYARD REVIVAL | LV %d (%d/%d XP) | $%d | %d/%d cars" % [level, xp, PlayerProgress.required_xp(level), cash, cars.size(), MAX_STORAGE]
     for child in body.get_children():
         body.remove_child(child)
         child.queue_free()
@@ -264,6 +266,8 @@ func _detach_part(part: String) -> void:
 func _sell_spare(index: int) -> void:
     var payout: int = PartsInventory.sell(spare_parts, index)
     cash += payout
+    if payout > 0:
+        _award_xp(PlayerProgress.salvage_xp(1))
     status = "Sold stored part for $%d." % payout
     _save_and_render()
 
@@ -325,6 +329,12 @@ func _cycle_part(part: String) -> void:
         status = "%s set to %s." % [part, next_choice]
     _save_and_render()
 
+func _award_xp(amount: int) -> void:
+    var state := {"level": level, "xp": xp}
+    PlayerProgress.add_xp(state, amount)
+    level = int(state["level"])
+    xp = int(state["xp"])
+
 func _perform_restoration_task(stage: String) -> void:
     if cars.is_empty():
         return
@@ -332,6 +342,7 @@ func _perform_restoration_task(stage: String) -> void:
     var spent: int = Restoration.perform_task(cars[selected_car], stage, cash)
     if spent >= 0:
         cash -= spent
+        _award_xp(PlayerProgress.restoration_xp(spent > 0))
         status = "Completed: %s%s" % [task, " ($%d)" % spent if spent > 0 else ""]
     else:
         status = "Cannot complete this task yet. Check available cash."
@@ -379,16 +390,20 @@ func _sell_part(part: String) -> void:
     var payout: int = Economy.sell_part(cars[selected_car], part)
     Customisation.set_choice(cars[selected_car], part, "None")
     cash += payout
+    if payout > 0:
+        _award_xp(PlayerProgress.salvage_xp(1))
     status = "Sold %s for $%d. No penalties." % [part, payout]
     _save_and_render()
 
 func _strip_car() -> void:
     if cars.is_empty():
         return
+    var count: int = cars[selected_car].get("parts", {}).size()
     var payout: int = Economy.strip_all(cars[selected_car])
     for part in Economy.PARTS:
         Customisation.set_choice(cars[selected_car], part, "None")
     cash += payout
+    _award_xp(PlayerProgress.salvage_xp(count))
     status = "Sold remaining parts for $%d." % payout
     _save_and_render()
 
@@ -414,7 +429,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
+        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "xp": xp, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments, "selected_category": selected_category}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -426,7 +441,8 @@ func _load_game() -> void:
     if data is Dictionary:
         current_tab = clampi(int(data.get("tab", 0)), 0, TABS.size() - 1)
         cash = int(data.get("cash", 5000))
-        level = int(data.get("level", 1))
+        level = maxi(1, int(data.get("level", 1)))
+        xp = maxi(0, int(data.get("xp", 0)))
         selected_car = int(data.get("selected", 0))
         garage_bay = clampi(int(data.get("bay", 0)), 0, 2)
         storage_filter = str(data.get("storage_filter", "All"))
