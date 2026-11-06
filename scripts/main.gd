@@ -5,6 +5,7 @@ const Restoration = preload("res://scripts/restoration.gd")
 const Customisation = preload("res://scripts/customisation.gd")
 const PartsInventory = preload("res://scripts/parts_inventory.gd")
 const VehiclePreviewScript = preload("res://scripts/vehicle_preview.gd")
+const WorkshopBays = preload("res://scripts/workshop_bays.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -14,6 +15,7 @@ var cars: Array[Dictionary] = []
 var spare_parts: Array = []
 var selected_car := 0
 var garage_bay := 0
+var bay_assignments: Array = ["", "", ""]
 var storage_filter := "All"
 var selected_category := "Spoiler"
 var status := "Welcome to Junkyard Revival."
@@ -96,14 +98,38 @@ func _render_workshop() -> void:
     body.add_child(bay_row)
     for i in range(3):
         var button := Button.new()
-        button.text = "BAY %d%s" % [i + 1, "  [ACTIVE]" if garage_bay == i else ""]
+        var car_index: int = WorkshopBays.find_index(cars, str(bay_assignments[i]))
+        var occupant := "EMPTY" if car_index == -1 else Economy.display_name(cars[car_index])
+        button.text = "BAY %d%s\n%s" % [i + 1, " [ACTIVE]" if garage_bay == i else "", occupant]
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         button.pressed.connect(_select_bay.bind(i))
         bay_row.add_child(button)
-    _label("Choose a vehicle below to inspect, restore, strip, or sell. No penalties.")
+    _label("Assign a car to the active bay, or clear the bay to free the workspace.")
+    if not cars.is_empty():
+        _button("Assign selected vehicle to Bay %d" % (garage_bay + 1), _assign_selected_to_bay)
+    _button("Clear Bay %d" % (garage_bay + 1), _clear_active_bay)
+    var active_index: int = WorkshopBays.find_index(cars, str(bay_assignments[garage_bay]))
+    if active_index >= 0:
+        _button("Select vehicle occupying this bay", _select_car.bind(active_index))
+
+func _assign_selected_to_bay() -> void:
+    if cars.is_empty():
+        return
+    selected_car = clampi(selected_car, 0, cars.size() - 1)
+    bay_assignments = WorkshopBays.assign(bay_assignments, cars, garage_bay, str(cars[selected_car].get("id", "")))
+    status = "Vehicle assigned to workshop bay %d." % (garage_bay + 1)
+    _save_and_render()
+
+func _clear_active_bay() -> void:
+    bay_assignments = WorkshopBays.clear(bay_assignments, garage_bay)
+    status = "Workshop bay %d cleared." % (garage_bay + 1)
+    _save_and_render()
 
 func _select_bay(index: int) -> void:
     garage_bay = clampi(index, 0, 2)
+    var occupant: int = WorkshopBays.find_index(cars, str(bay_assignments[garage_bay]))
+    if occupant >= 0:
+        selected_car = occupant
     status = "Workshop bay %d selected." % (garage_bay + 1)
     _save_and_render()
 
@@ -326,6 +352,7 @@ func _sell_shell() -> void:
     var payout: int = Economy.sell_shell(cars[selected_car])
     cash += payout
     cars.remove_at(selected_car)
+    bay_assignments = WorkshopBays.normalise(bay_assignments, cars)
     selected_car = maxi(0, selected_car - 1)
     status = "Sold shell for $%d. All choices are yours." % payout
     _save_and_render()
@@ -341,7 +368,7 @@ func _save_and_render() -> void:
 func _save_game() -> void:
     var file := FileAccess.open("user://junkyard_revival.json", FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter}))
+        file.store_string(JSON.stringify({"tab": current_tab, "cash": cash, "level": level, "cars": cars, "selected": selected_car, "bay": garage_bay, "spare_parts": spare_parts, "storage_filter": storage_filter, "bay_assignments": bay_assignments}))
 
 func _load_game() -> void:
     if not FileAccess.file_exists("user://junkyard_revival.json"):
@@ -357,6 +384,9 @@ func _load_game() -> void:
         selected_car = int(data.get("selected", 0))
         garage_bay = clampi(int(data.get("bay", 0)), 0, 2)
         storage_filter = str(data.get("storage_filter", "All"))
+        var loaded_bays = data.get("bay_assignments", ["", "", ""])
+        if loaded_bays is Array:
+            bay_assignments = loaded_bays
         var saved_spares = data.get("spare_parts", [])
         if saved_spares is Array:
             spare_parts = saved_spares
@@ -365,3 +395,4 @@ func _load_game() -> void:
             for item in saved_cars:
                 if item is Dictionary:
                     cars.append(item)
+        bay_assignments = WorkshopBays.normalise(bay_assignments, cars)
