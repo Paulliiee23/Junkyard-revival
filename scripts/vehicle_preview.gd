@@ -86,4 +86,4 @@ func _draw() -> void:
     if detailing_progress >= 2:
         draw_line(Vector2(left + width * 0.12, top + height * 0.47),
             Vector2(left + width * 0.29, top + height * 0.47),
-            Color("#f2e7d3").with_alpha(0.35 if detailing_progress == 2 else 0.75), 3.0)
+            Color(Color("#f2e7d3"), 0.35 if detailing_progress == 2 else 0.75), 3.0)
