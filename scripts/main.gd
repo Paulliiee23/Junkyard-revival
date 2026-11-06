@@ -245,7 +245,9 @@ func _render_cars() -> void:
         _label("Paint finish: %s" % car.get("paint", "Rust"))
         for paint_name in ["Rust", "Crimson", "Midnight", "Ivory", "Violet", "Lime"]:
             _button("Paint: %s" % paint_name, _paint_car.bind(paint_name))
-    _button("Sell bare shell and remove vehicle", _sell_shell)
+    _button("Sell shell only (fitted parts not paid separately)", _sell_shell)
+    if not car.get("parts", {}).is_empty():
+        _button("Sell ALL fitted parts + shell together", _sell_complete_vehicle)
 
 func _render_spare_parts() -> void:
     _label("Spare parts in storage: %d" % spare_parts.size())
@@ -405,6 +407,20 @@ func _strip_car() -> void:
     cash += payout
     _award_xp(PlayerProgress.salvage_xp(count))
     status = "Sold remaining parts for $%d." % payout
+    _save_and_render()
+
+func _sell_complete_vehicle() -> void:
+    if cars.is_empty():
+        return
+    var count: int = cars[selected_car].get("parts", {}).size()
+    var part_payout: int = Economy.strip_all(cars[selected_car])
+    var shell_payout: int = Economy.sell_shell(cars[selected_car])
+    cash += part_payout + shell_payout
+    _award_xp(PlayerProgress.salvage_xp(count))
+    cars.remove_at(selected_car)
+    bay_assignments = WorkshopBays.normalise(bay_assignments, cars)
+    selected_car = maxi(0, selected_car - 1)
+    status = "Sold %d fitted parts and shell for $%d. No penalties." % [count, part_payout + shell_payout]
     _save_and_render()
 
 func _sell_shell() -> void:
