@@ -14,6 +14,7 @@ const VehicleAppraisal = preload("res://scripts/vehicle_appraisal.gd")
 const CarBuyers = preload("res://scripts/car_buyers.gd")
 const JunkyardBackdrop = preload("res://scripts/junkyard_backdrop.gd")
 const ConceptScreen = preload("res://scripts/concept_screen.gd")
+const GarageScreen = preload("res://scripts/garage_screen.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -37,6 +38,7 @@ var root: VBoxContainer
 var header: Label
 var body: VBoxContainer
 var concept_screen: Control
+var garage_screen: Control
 var concept_slot := 0
 
 func _ready() -> void:
@@ -44,6 +46,7 @@ func _ready() -> void:
     YardStock.refresh(yard_stock, int(Time.get_unix_time_from_system()))
     _build_ui()
     _build_concept_screen()
+    _build_garage_screen()
     _render()
 
 func _build_ui() -> void:
@@ -86,6 +89,33 @@ func _build_concept_screen() -> void:
     concept_screen.wreck_requested.connect(_concept_claim)
     concept_screen.page_requested.connect(_concept_page)
 
+func _build_garage_screen() -> void:
+    garage_screen = GarageScreen.new()
+    add_child(garage_screen)
+    garage_screen.tab_requested.connect(_change_tab)
+    garage_screen.bay_requested.connect(_select_bay)
+    garage_screen.restore_requested.connect(_garage_restore)
+    garage_screen.customise_requested.connect(func(): _change_tab(2))
+    garage_screen.strip_requested.connect(_garage_strip)
+
+func _garage_restore() -> void:
+    var index: int = WorkshopBays.find_index(cars, str(bay_assignments[garage_bay]))
+    if index < 0:
+        status = "Assign a vehicle to this bay before restoring it."
+    else:
+        selected_car = index
+        status = "Vehicle selected for restoration. Use the workshop actions below."
+    _save_and_render()
+
+func _garage_strip() -> void:
+    var index: int = WorkshopBays.find_index(cars, str(bay_assignments[garage_bay]))
+    if index >= 0:
+        selected_car = index
+        status = "Vehicle selected for stripping or sale."
+    else:
+        status = "Select a vehicle before stripping or selling."
+    _save_and_render()
+
 func _concept_page(direction: int) -> void:
     var stock: Array = yard_stock.get(str(selected_zone), {}).get("cars", [])
     concept_slot = posmod(concept_slot + direction, maxi(stock.size(), 1))
@@ -118,8 +148,10 @@ func _button(title: String, callback: Callable) -> void:
     body.add_child(button)
 
 func _render() -> void:
-    root.visible = current_tab != 0
+    root.visible = current_tab != 0 and current_tab != 1
     concept_screen.visible = current_tab == 0
+    garage_screen.visible = current_tab == 1
+    garage_screen.update_garage(cars, bay_assignments, garage_bay, level, xp, PlayerProgress.required_xp(level), cash)
     concept_screen.update_hud(level, xp, PlayerProgress.required_xp(level), cash)
     var visible_stock: Array = yard_stock.get(str(selected_zone), {}).get("cars", [])
     concept_screen.update_stock(visible_stock, concept_slot, JunkyardZones.zone_name(selected_zone))
