@@ -1,0 +1,566 @@
+{
+  "project": "Junkyard Revival",
+  "version": 1,
+  "parts": [
+    {
+      "id": "front_bumper_factory",
+      "name": "Factory",
+      "category": "front_bumper",
+      "price": 0,
+      "preview": "res://assets/parts_2d/front_bumper_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_street_hunter",
+      "name": "Street Hunter",
+      "category": "front_bumper",
+      "price": 17000,
+      "preview": "res://assets/parts_2d/front_bumper_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_underground",
+      "name": "Underground",
+      "category": "front_bumper",
+      "price": 22000,
+      "preview": "res://assets/parts_2d/front_bumper_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_drift_demon",
+      "name": "Drift Demon",
+      "category": "front_bumper",
+      "price": 27000,
+      "preview": "res://assets/parts_2d/front_bumper_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "front_bumper",
+      "price": 32000,
+      "preview": "res://assets/parts_2d/front_bumper_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_gt_endurance",
+      "name": "GT Endurance",
+      "category": "front_bumper",
+      "price": 37000,
+      "preview": "res://assets/parts_2d/front_bumper_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "front_bumper",
+      "price": 42000,
+      "preview": "res://assets/parts_2d/front_bumper_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_retro_racer",
+      "name": "Retro Racer",
+      "category": "front_bumper",
+      "price": 47000,
+      "preview": "res://assets/parts_2d/front_bumper_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "front_bumper",
+      "price": 52000,
+      "preview": "res://assets/parts_2d/front_bumper_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "front_bumper_showstopper",
+      "name": "Showstopper",
+      "category": "front_bumper",
+      "price": 57000,
+      "preview": "res://assets/parts_2d/front_bumper_showstopper.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_factory",
+      "name": "Factory",
+      "category": "rear_bumper",
+      "price": 0,
+      "preview": "res://assets/parts_2d/rear_bumper_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_street_hunter",
+      "name": "Street Hunter",
+      "category": "rear_bumper",
+      "price": 19000,
+      "preview": "res://assets/parts_2d/rear_bumper_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_underground",
+      "name": "Underground",
+      "category": "rear_bumper",
+      "price": 24000,
+      "preview": "res://assets/parts_2d/rear_bumper_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_drift_demon",
+      "name": "Drift Demon",
+      "category": "rear_bumper",
+      "price": 29000,
+      "preview": "res://assets/parts_2d/rear_bumper_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "rear_bumper",
+      "price": 34000,
+      "preview": "res://assets/parts_2d/rear_bumper_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_gt_endurance",
+      "name": "GT Endurance",
+      "category": "rear_bumper",
+      "price": 39000,
+      "preview": "res://assets/parts_2d/rear_bumper_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "rear_bumper",
+      "price": 44000,
+      "preview": "res://assets/parts_2d/rear_bumper_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_retro_racer",
+      "name": "Retro Racer",
+      "category": "rear_bumper",
+      "price": 49000,
+      "preview": "res://assets/parts_2d/rear_bumper_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "rear_bumper",
+      "price": 54000,
+      "preview": "res://assets/parts_2d/rear_bumper_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "rear_bumper_showstopper",
+      "name": "Showstopper",
+      "category": "rear_bumper",
+      "price": 59000,
+      "preview": "res://assets/parts_2d/rear_bumper_showstopper.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_factory",
+      "name": "Factory",
+      "category": "spoiler",
+      "price": 0,
+      "preview": "res://assets/parts_2d/spoiler_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_street_hunter",
+      "name": "Street Hunter",
+      "category": "spoiler",
+      "price": 21000,
+      "preview": "res://assets/parts_2d/spoiler_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_underground",
+      "name": "Underground",
+      "category": "spoiler",
+      "price": 26000,
+      "preview": "res://assets/parts_2d/spoiler_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_drift_demon",
+      "name": "Drift Demon",
+      "category": "spoiler",
+      "price": 31000,
+      "preview": "res://assets/parts_2d/spoiler_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "spoiler",
+      "price": 36000,
+      "preview": "res://assets/parts_2d/spoiler_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_gt_endurance",
+      "name": "GT Endurance",
+      "category": "spoiler",
+      "price": 41000,
+      "preview": "res://assets/parts_2d/spoiler_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "spoiler",
+      "price": 46000,
+      "preview": "res://assets/parts_2d/spoiler_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_retro_racer",
+      "name": "Retro Racer",
+      "category": "spoiler",
+      "price": 51000,
+      "preview": "res://assets/parts_2d/spoiler_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "spoiler",
+      "price": 56000,
+      "preview": "res://assets/parts_2d/spoiler_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "spoiler_showstopper",
+      "name": "Showstopper",
+      "category": "spoiler",
+      "price": 61000,
+      "preview": "res://assets/parts_2d/spoiler_showstopper.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_factory",
+      "name": "Factory",
+      "category": "hood",
+      "price": 0,
+      "preview": "res://assets/parts_2d/hood_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_street_hunter",
+      "name": "Street Hunter",
+      "category": "hood",
+      "price": 23000,
+      "preview": "res://assets/parts_2d/hood_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_underground",
+      "name": "Underground",
+      "category": "hood",
+      "price": 28000,
+      "preview": "res://assets/parts_2d/hood_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_drift_demon",
+      "name": "Drift Demon",
+      "category": "hood",
+      "price": 33000,
+      "preview": "res://assets/parts_2d/hood_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "hood",
+      "price": 38000,
+      "preview": "res://assets/parts_2d/hood_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_gt_endurance",
+      "name": "GT Endurance",
+      "category": "hood",
+      "price": 43000,
+      "preview": "res://assets/parts_2d/hood_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "hood",
+      "price": 48000,
+      "preview": "res://assets/parts_2d/hood_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_retro_racer",
+      "name": "Retro Racer",
+      "category": "hood",
+      "price": 53000,
+      "preview": "res://assets/parts_2d/hood_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "hood",
+      "price": 58000,
+      "preview": "res://assets/parts_2d/hood_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "hood_showstopper",
+      "name": "Showstopper",
+      "category": "hood",
+      "price": 63000,
+      "preview": "res://assets/parts_2d/hood_showstopper.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_factory",
+      "name": "Factory",
+      "category": "wheel",
+      "price": 0,
+      "preview": "res://assets/parts_2d/wheel_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_street_hunter",
+      "name": "Street Hunter",
+      "category": "wheel",
+      "price": 25000,
+      "preview": "res://assets/parts_2d/wheel_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_underground",
+      "name": "Underground",
+      "category": "wheel",
+      "price": 30000,
+      "preview": "res://assets/parts_2d/wheel_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_drift_demon",
+      "name": "Drift Demon",
+      "category": "wheel",
+      "price": 35000,
+      "preview": "res://assets/parts_2d/wheel_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "wheel",
+      "price": 40000,
+      "preview": "res://assets/parts_2d/wheel_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_gt_endurance",
+      "name": "GT Endurance",
+      "category": "wheel",
+      "price": 45000,
+      "preview": "res://assets/parts_2d/wheel_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "wheel",
+      "price": 50000,
+      "preview": "res://assets/parts_2d/wheel_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_retro_racer",
+      "name": "Retro Racer",
+      "category": "wheel",
+      "price": 55000,
+      "preview": "res://assets/parts_2d/wheel_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "wheel",
+      "price": 60000,
+      "preview": "res://assets/parts_2d/wheel_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "wheel_showstopper",
+      "name": "Showstopper",
+      "category": "wheel",
+      "price": 65000,
+      "preview": "res://assets/parts_2d/wheel_showstopper.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_factory",
+      "name": "Factory",
+      "category": "exhaust",
+      "price": 0,
+      "preview": "res://assets/parts_2d/exhaust_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_street_hunter",
+      "name": "Street Hunter",
+      "category": "exhaust",
+      "price": 27000,
+      "preview": "res://assets/parts_2d/exhaust_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_underground",
+      "name": "Underground",
+      "category": "exhaust",
+      "price": 32000,
+      "preview": "res://assets/parts_2d/exhaust_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_drift_demon",
+      "name": "Drift Demon",
+      "category": "exhaust",
+      "price": 37000,
+      "preview": "res://assets/parts_2d/exhaust_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "exhaust",
+      "price": 42000,
+      "preview": "res://assets/parts_2d/exhaust_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_gt_endurance",
+      "name": "GT Endurance",
+      "category": "exhaust",
+      "price": 47000,
+      "preview": "res://assets/parts_2d/exhaust_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "exhaust",
+      "price": 52000,
+      "preview": "res://assets/parts_2d/exhaust_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_retro_racer",
+      "name": "Retro Racer",
+      "category": "exhaust",
+      "price": 57000,
+      "preview": "res://assets/parts_2d/exhaust_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "exhaust",
+      "price": 62000,
+      "preview": "res://assets/parts_2d/exhaust_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "exhaust_showstopper",
+      "name": "Showstopper",
+      "category": "exhaust",
+      "price": 67000,
+      "preview": "res://assets/parts_2d/exhaust_showstopper.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_factory",
+      "name": "Factory",
+      "category": "roof_scoop",
+      "price": 0,
+      "preview": "res://assets/parts_2d/roof_scoop_factory.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_street_hunter",
+      "name": "Street Hunter",
+      "category": "roof_scoop",
+      "price": 29000,
+      "preview": "res://assets/parts_2d/roof_scoop_street_hunter.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_underground",
+      "name": "Underground",
+      "category": "roof_scoop",
+      "price": 34000,
+      "preview": "res://assets/parts_2d/roof_scoop_underground.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_drift_demon",
+      "name": "Drift Demon",
+      "category": "roof_scoop",
+      "price": 39000,
+      "preview": "res://assets/parts_2d/roof_scoop_drift_demon.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_cyberstrike",
+      "name": "Cyberstrike",
+      "category": "roof_scoop",
+      "price": 44000,
+      "preview": "res://assets/parts_2d/roof_scoop_cyberstrike.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_gt_endurance",
+      "name": "GT Endurance",
+      "category": "roof_scoop",
+      "price": 49000,
+      "preview": "res://assets/parts_2d/roof_scoop_gt_endurance.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_widebody_monster",
+      "name": "Widebody Monster",
+      "category": "roof_scoop",
+      "price": 54000,
+      "preview": "res://assets/parts_2d/roof_scoop_widebody_monster.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_retro_racer",
+      "name": "Retro Racer",
+      "category": "roof_scoop",
+      "price": 59000,
+      "preview": "res://assets/parts_2d/roof_scoop_retro_racer.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_drag_outlaw",
+      "name": "Drag Outlaw",
+      "category": "roof_scoop",
+      "price": 64000,
+      "preview": "res://assets/parts_2d/roof_scoop_drag_outlaw.png",
+      "status": "prototype_fitment_pending"
+    },
+    {
+      "id": "roof_scoop_showstopper",
+      "name": "Showstopper",
+      "category": "roof_scoop",
+      "price": 69000,
+      "preview": "res://assets/parts_2d/roof_scoop_showstopper.png",
+      "status": "prototype_fitment_pending"
+    }
+  ]
+}
