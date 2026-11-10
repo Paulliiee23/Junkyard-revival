@@ -15,6 +15,7 @@ const CarBuyers = preload("res://scripts/car_buyers.gd")
 const JunkyardBackdrop = preload("res://scripts/junkyard_backdrop.gd")
 const ConceptScreen = preload("res://scripts/concept_screen.gd")
 const GarageScreen = preload("res://scripts/garage_screen.gd")
+const CustomiseScreen = preload("res://scripts/customise_screen.gd")
 const TABS := ["Junkyard", "Garage", "Customise", "Upgrades", "Contracts", "Car Show", "Shop", "Storage", "Inspection", "Drag Strip"]
 const MAX_STORAGE := 100
 var current_tab := 0
@@ -39,6 +40,7 @@ var header: Label
 var body: VBoxContainer
 var concept_screen: Control
 var garage_screen: Control
+var customise_screen: Control
 var concept_slot := 0
 
 func _ready() -> void:
@@ -47,6 +49,7 @@ func _ready() -> void:
     _build_ui()
     _build_concept_screen()
     _build_garage_screen()
+    _build_customise_screen()
     _render()
 
 func _build_ui() -> void:
@@ -98,6 +101,42 @@ func _build_garage_screen() -> void:
     garage_screen.customise_requested.connect(func(): _change_tab(2))
     garage_screen.strip_requested.connect(_garage_strip)
 
+func _build_customise_screen() -> void:
+    customise_screen = CustomiseScreen.new()
+    add_child(customise_screen)
+    customise_screen.tab_requested.connect(_change_tab)
+    customise_screen.buy_requested.connect(_purchase_catalogue_part)
+
+func _purchase_catalogue_part(part_id: String) -> void:
+    if cars.is_empty():
+        status = "Claim a vehicle before buying custom parts."
+        _render()
+        return
+    var item: Dictionary = {}
+    for candidate in customise_screen.entries:
+        if candidate is Dictionary and str(candidate.get("id", "")) == part_id:
+            item = candidate
+            break
+    if item.is_empty():
+        return
+    var car: Dictionary = cars[clampi(selected_car, 0, cars.size() - 1)]
+    var owned: Dictionary = car.get("purchased_part_ids", {})
+    var price := maxi(0, int(item.get("price", 0)))
+    if not owned.has(part_id):
+        if cash < price:
+            status = "Not enough cash for this part."
+            _render()
+            return
+        cash -= price
+        owned[part_id] = true
+    car["purchased_part_ids"] = owned
+    var fitted: Dictionary = car.get("installed_catalogue_parts", {})
+    fitted[str(item.get("category", ""))] = part_id
+    car["installed_catalogue_parts"] = fitted
+    cars[selected_car] = car
+    status = "Installed %s in the parts catalogue. Vehicle-specific artwork fitment is pending." % str(item.get("name", part_id))
+    _save_and_render()
+
 func _garage_restore() -> void:
     var index: int = WorkshopBays.find_index(cars, str(bay_assignments[garage_bay]))
     if index < 0:
@@ -148,7 +187,13 @@ func _button(title: String, callback: Callable) -> void:
     body.add_child(button)
 
 func _render() -> void:
-    root.visible = current_tab != 0 and current_tab != 1
+    root.visible = current_tab != 0 and current_tab != 1 and current_tab != 2
+    customise_screen.visible = current_tab == 2
+    if not cars.is_empty():
+        selected_car = clampi(selected_car, 0, cars.size() - 1)
+        customise_screen.set_shop_state(cash, cars[selected_car])
+    else:
+        customise_screen.set_shop_state(cash, {})
     concept_screen.visible = current_tab == 0
     garage_screen.visible = current_tab == 1
     garage_screen.update_garage(cars, bay_assignments, garage_bay, level, xp, PlayerProgress.required_xp(level), cash)
