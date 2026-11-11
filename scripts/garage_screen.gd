@@ -93,6 +93,10 @@ func update_garage(cars: Array[Dictionary], assignments: Array, active_bay: int,
         vehicle.mouse_filter = Control.MOUSE_FILTER_IGNORE
         previews[i].add_child(vehicle)
         vehicle.set_vehicle(car)
+        var overlays = preload("res://scripts/part_compositor.gd").new()
+        vehicle.add_child(overlays)
+        overlays.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+        overlays.show_vehicle(car)
 
 func _find_car(cars: Array[Dictionary], id: String) -> int:
     if id.is_empty():
