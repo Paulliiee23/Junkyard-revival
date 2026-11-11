@@ -17,6 +17,7 @@ var detail: Label
 var preview: TextureRect
 var buy: Button
 var car_preview: Control
+var part_compositor: Control
 
 func _ready() -> void:
     set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -61,6 +62,9 @@ func _ready() -> void:
     car_preview = preload("res://scripts/vehicle_preview.gd").new()
     car_preview.custom_minimum_size = Vector2(270, 140)
     side.add_child(car_preview)
+    part_compositor = preload("res://scripts/part_compositor.gd").new()
+    car_preview.add_child(part_compositor)
+    part_compositor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     preview = TextureRect.new()
     preview.custom_minimum_size = Vector2(260, 145)
     preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -94,6 +98,8 @@ func _navigate(index: int) -> void:
 func _choose_category(value: String) -> void:
     active_category = value
     selected = {}
+    if part_compositor != null:
+        part_compositor.show_vehicle(car)
     _refresh()
 
 func set_shop_state(balance: int, vehicle: Dictionary) -> void:
@@ -102,6 +108,7 @@ func set_shop_state(balance: int, vehicle: Dictionary) -> void:
     owned = vehicle.get("purchased_part_ids", {})
     if car_preview != null:
         car_preview.set_vehicle(car)
+        part_compositor.show_vehicle(car, str(selected.get("category", "")), str(selected.get("id", "")))
     _refresh()
 
 func _refresh() -> void:
@@ -134,6 +141,8 @@ func _texture_for(item: Dictionary) -> Texture2D:
 
 func _select(item: Dictionary) -> void:
     selected = item
+    if part_compositor != null:
+        part_compositor.show_vehicle(car, str(item.get("category", "")), str(item.get("id", "")))
     _show_selection()
 
 func _show_selection() -> void:
@@ -148,7 +157,7 @@ func _show_selection() -> void:
     detail.text = "%s\n%s\nPrice $%d\n%s" % [str(selected.get("name", "")), CATEGORY.get(active_category, active_category), price, "Owned" if owned.has(id) else "Preview only — no charge"]
     buy.text = "INSTALL OWNED" if owned.has(id) else "BUY & INSTALL"
     buy.disabled = car.is_empty() or (not owned.has(id) and cash < price)
-    status_label.text = "3D-derived part render. Precise vehicle fitment and in-car compositing are still in development."
+    status_label.text = "EXPERIMENTAL COMPOSITE: preview positions are generic and not yet fitted to individual vehicle bodies."
 
 func _purchase() -> void:
     if not selected.is_empty():
